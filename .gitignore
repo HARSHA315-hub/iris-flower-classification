@@ -1,18 +1,26 @@
 
-# Virtual environment
+# Python virtual environments
 venv/
 .venv/
 
-# Python cache files
+# Python cache
 __pycache__/
 *.py[cod]
 
-# Local database
+# Local databases
 instance/
 *.db
 
-# Environment variables and secrets
+# Secrets
 .env
+.env.*
+!.env.example
 
 # Testing cache
 .pytest_cache/
+
+# IDE settings
+.vscode/
+
+# Node dependencies
+node_modules/

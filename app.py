@@ -1,17 +1,38 @@
 
+import os
 import csv
 import io
 import joblib
 import pandas as pd
 
+from dotenv import load_dotenv
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify, render_template, make_response
 from sqlalchemy import func
 from models import db, Prediction
 
+load_dotenv(".env.local")
+
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///iris_predictions.db"
+database_url = os.getenv("DATABASE_URL")
+
+if not database_url:
+    raise RuntimeError(
+        "DATABASE_URL is missing. Check your .env.local configuration."
+    )
+
+# Use psycopg 3 explicitly if Neon supplies a standard postgres:// URL.
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://", "postgresql+psycopg://", 1
+    )
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace(
+        "postgresql://", "postgresql+psycopg://", 1
+    )
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
@@ -93,11 +114,11 @@ def predict():
             )
         }
         record = Prediction(
-        sepal_length=values[0],
-        sepal_width=values[1],
-        petal_length=values[2],
-        petal_width=values[3],
-        predicted_species=species
+            sepal_length=values[0],
+            sepal_width=values[1],
+            petal_length=values[2],
+            petal_width=values[3],
+            predicted_species=species
         )
 
         db.session.add(record)
@@ -108,11 +129,12 @@ def predict():
             "probabilities": class_probabilities
         })
 
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
+        db.session.rollback()
         return jsonify({
-            "error": str(e)
+            "error": "An internal server error occurred."
         }), 500
 
 
