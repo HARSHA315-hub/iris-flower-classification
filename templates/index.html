@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Flower Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <h1>Iris Flower Classifier</h1>
+        <p class="subtitle">
+            Enter the flower measurements to predict its species.
+        </p>
+
+        <form id="prediction-form">
+            <label for="sepal_length">Sepal Length (cm)</label>
+            <input type="number" id="sepal_length" step="any" min="0.01" max="10" required>
+
+            <label for="sepal_width">Sepal Width (cm)</label>
+            <input type="number" id="sepal_width" step="any" min="0.01" max="10" required>
+
+            <label for="petal_length">Petal Length (cm)</label>
+            <input type="number" id="petal_length" step="any" min="0.01" max="10" required>
+
+            <label for="petal_width">Petal Width (cm)</label>
+            <input type="number" id="petal_width" step="any" min="0.01" max="10" required>
+
+            <button type="submit">Predict Species</button>
+        </form>
+
+        <div id="result" role="status" aria-live="polite"></div>
+    </main>
+
+    <script>
+        const form = document.getElementById("prediction-form");
+        const result = document.getElementById("result");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const measurements = {
+                sepal_length: Number(document.getElementById("sepal_length").value),
+                sepal_width: Number(document.getElementById("sepal_width").value),
+                petal_length: Number(document.getElementById("petal_length").value),
+                petal_width: Number(document.getElementById("petal_width").value)
+            };
+
+            result.textContent = "Predicting...";
+
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(measurements)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Prediction failed.");
+                }
+
+                result.innerHTML = `
+                    <h2>Prediction Result</h2>
+                    <p>Predicted Species: <strong>${data.predicted_species}</strong></p>
+                    <h3>Estimated Class Probabilities</h3>
+                    <ul>
+                        ${Object.entries(data.probabilities)
+                            .map(([species, probability]) =>
+                                `<li>${species}: ${probability}%</li>`
+                            ).join("")}
+                    </ul>
+                `;
+
+            } catch (error) {
+                result.textContent = "Error: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

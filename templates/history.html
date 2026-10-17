@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container history-container">
+        <h1>Prediction History</h1>
+        <p class="subtitle">Review your previously classified flowers.</p>
+
+        <p>
+            <a href="{{ url_for('home') }}">Back to Classifier</a>
+            |
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            |
+            <a href="{{ url_for('export_predictions') }}">Download CSV</a>
+        </p>
+
+        {% if predictions %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Sepal Length</th>
+                        <th>Sepal Width</th>
+                        <th>Petal Length</th>
+                        <th>Petal Width</th>
+                        <th>Predicted Species</th>
+                        <th>Date and Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in predictions %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ "%.2f"|format(item.sepal_length) }}</td>
+                        <td>{{ "%.2f"|format(item.sepal_width) }}</td>
+                        <td>{{ "%.2f"|format(item.petal_length) }}</td>
+                        <td>{{ "%.2f"|format(item.petal_width) }}</td>
+                        <td>{{ item.predicted_species }}</td>
+                        <td>{{ item.created_at.strftime("%d-%m-%Y %H:%M:%S") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p id="result">No predictions have been saved yet.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
+ 

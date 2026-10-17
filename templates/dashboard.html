@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <main class="container history-container">
+        <h1>Iris Classification Dashboard</h1>
+        <p class="subtitle">Summary of your saved predictions.</p>
+
+        <p>
+            <a href="{{ url_for('home') }}">Back to Classifier</a>
+            |
+            <a href="{{ url_for('history') }}">View History</a>
+        </p>
+
+        
+        <section class="stats-grid">
+            <div class="stat-card">
+                <p>Total Predictions</p>
+                <h2>{{ total_predictions }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Setosa</p>
+                <h2>{{ species_data["setosa"] }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Versicolor</p>
+                <h2>{{ species_data["versicolor"] }}</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Virginica</p>
+                <h2>{{ species_data["virginica"] }}</h2>
+            </div>
+        </section>
+
+
+        <section class="chart-card">
+            <h2>Predictions by Species</h2>
+            <canvas id="speciesChart"></canvas>
+            <p id="empty-message" hidden>
+                No predictions available yet. Make a prediction first.
+            </p>
+        </section>
+    </main>
+
+    <script>
+        const speciesData = {{ species_data | tojson }};
+        const labels = Object.keys(speciesData);
+        const counts = Object.values(speciesData);
+
+        if (labels.length === 0) {
+            document.getElementById("speciesChart").hidden = true;
+            document.getElementById("empty-message").hidden = false;
+        } else {
+            new Chart(document.getElementById("speciesChart"), {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Number of Predictions",
+                        data: counts,
+                        backgroundColor: [
+                            "#246b4b",
+                            "#73a985",
+                            "#a9cbb2"
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
