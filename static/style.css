@@ -205,3 +205,18 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+.dashboard-link {
+    display: inline-block;
+    margin: 20px;
+    padding: 12px 20px;
+    background: #246b4f;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.dashboard-link:hover {
+    background: #18543c;
+}
